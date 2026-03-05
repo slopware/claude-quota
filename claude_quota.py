@@ -71,6 +71,7 @@ def fetch_usage(access_token):
             "Authorization": f"Bearer {access_token}",
             "anthropic-beta": "oauth-2025-04-20",
             "Content-Type": "application/json",
+            "User-Agent": "claude-code/1.0",
         })
         with urllib.request.urlopen(req, timeout=5) as resp:
             if resp.status == 200:
@@ -110,7 +111,12 @@ def get_usage():
         save_cache(data)
         return data
 
-    return cache["data"] if cache else None
+    # Fetch failed (rate limit, network error, etc.) — update cache timestamp
+    # so we back off instead of retrying every statusline refresh
+    if cache:
+        save_cache(cache["data"])
+        return cache["data"]
+    return None
 
 
 def time_until_reset(resets_at_str):
@@ -202,7 +208,7 @@ def main():
                 resets_at = usage["five_hour"].get("resets_at", "")
                 if resets_at:
                     parts.append(f"{DIM}resets {time_until_reset(resets_at)}{RESET}")
-            segments.append("  ".join(parts))
+            segments.append(f" {DIM}\u00b7{RESET} ".join(parts))
 
     if segments:
         print("  ".join(segments))
