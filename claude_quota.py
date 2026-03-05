@@ -202,7 +202,7 @@ def main():
                 resets_at = usage["five_hour"].get("resets_at", "")
                 if resets_at:
                     parts.append(f"{DIM}resets {time_until_reset(resets_at)}{RESET}")
-            segments.append(" \u00b7 ".join(parts))
+            segments.append("  ".join(parts))
 
     if segments:
         print("  ".join(segments))
