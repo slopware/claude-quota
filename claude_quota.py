@@ -151,7 +151,9 @@ def parse_flags():
     all_flags = {"--model", "--dir", "--context", "--cost", "--quota", "--reset"}
     specified = args & all_flags
     if not specified:
-        return {f: True for f in all_flags}
+        defaults = {f: True for f in all_flags}
+        defaults["--cost"] = False
+        return defaults
     return {f: f in specified for f in all_flags}
 
 
@@ -180,9 +182,8 @@ def main():
         pct = ctx.get("used_percentage")
         if pct is not None:
             pct = int(pct)
-            remaining = int(ctx.get("remaining_percentage", 100 - pct))
             bar = render_bar(pct)
-            segments.append(f"{bar} {DIM}{pct}% used \u00b7 {remaining}% left{RESET}")
+            segments.append(f"{bar} {DIM}{pct}%{RESET}")
         elif session:
             segments.append(f"{DIM}{EMPTY * 10} no data yet{RESET}")
 
